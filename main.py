@@ -92,7 +92,7 @@ if __name__ == "__main__":
             st.balloons()
         if st.session_state["P2_SCORE"] >= 100:
             SCORE2.value = st.session_state["P2_SCORE"]
-            st.title(f"CONGRATULATIONS {st.session_state['P2_NAME']}")
+            st.title(f"CONGRATULATIONS {st.session_state['P2_NAME'].upper()}!")
             st.balloons()
 
     hide_watermark()
