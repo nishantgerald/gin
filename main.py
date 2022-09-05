@@ -34,34 +34,65 @@ def subtract_score(OLD_SCORE, CHANGE):
 
 
 if __name__ == "__main__":
-    st.session_state["NEW_GAME"] = "True"
-
-    if st.session_state["NEW_GAME"] == "True":
+    st.write("Starting new session")
+    st.session_state["ROUND_COMPLETE"] = "False"
+    if "NEW_GAME" not in st.session_state:
         P1_NAME, P2_NAME, placeholder = get_player_names()
-        st.session_state["P1_NAME"] = P1_NAME
-        st.session_state["P2_NAME"] = P2_NAME
-        st.session_state["P1_SCORE"] = 0
-        st.session_state["P2_SCORE"] = 0
-        st.session_state["NEW_GAME"] = "False"
-
-    if st.session_state["NEW_GAME"] == "False":
         if P1_NAME and P2_NAME:
-            time.sleep(2)
+            st.session_state["P1_NAME"] = P1_NAME
+            st.session_state["P2_NAME"] = P2_NAME
+            st.session_state["P1_SCORE"] = 0
+            st.session_state["P2_SCORE"] = 0
+            st.session_state["NEW_GAME"] = "False"
+            time.sleep(1)
             placeholder.empty()
 
-    PLAYER1, PLAYER2 = st.columns(2)
-    if P1_NAME and P2_NAME:
+    PLAYER1, SPACER1, CHANGE, SPACER2, PLAYER2 = st.columns(5)
+    if "P1_NAME" in st.session_state and "P2_NAME" in st.session_state:
         PLAYER1.subheader(st.session_state["P1_NAME"])
         PLAYER2.subheader(st.session_state["P2_NAME"])
+        SCORE1 = PLAYER1.metric(label="Score", value=st.session_state["P1_SCORE"])
+        SCORE2 = PLAYER2.metric(label="Score", value=st.session_state["P2_SCORE"])
+        WINNER = CHANGE.radio(
+            "Round Winner:",
+            (
+                f'{st.session_state["P1_NAME"]}',
+                f'{st.session_state["P2_NAME"]}',
+                "Draw",
+            ),
+            key="winner",
+        )
+        POINT_CHANGE = CHANGE.number_input(label="Point Change", value=0)
+        ADJUST_SCORE = CHANGE.button(label="Adjust Score")
+        RESET_SCORE = CHANGE.button(label="Reset Score")
+        if ADJUST_SCORE:
+            if WINNER == f'{st.session_state["P1_NAME"]}':
+                st.session_state["P1_SCORE"] += POINT_CHANGE
+                SCORE1.value = st.session_state["P1_SCORE"]
+            elif WINNER == f'{st.session_state["P2_NAME"]}':
+                st.session_state["P2_SCORE"] += POINT_CHANGE
+                SCORE2.value = st.session_state["P2_SCORE"]
+            else:
+                pass
+            # Reruning script to update score on score adjustment
+            st.experimental_rerun()
 
-    (
-        PLAYER1_SCORE_COUNT,
-        PLAYER1_CHANGE,
-        PLAYER2_SCORE_COUNT,
-        PLAYER2_CHANGE,
-    ) = st.columns(4)
+        # SET SCORES BACK TO ZERO IF RESET SCORE BUTTON IS CLICKED
+        if RESET_SCORE:
+            st.session_state["P1_SCORE"] = 0
+            st.session_state["P2_SCORE"] = 0
+            SCORE1.value = st.session_state["P1_SCORE"]
+            SCORE2.value = st.session_state["P2_SCORE"]
+            st.experimental_rerun()
 
-    PLAYER1_SCORE_COUNT.metric(label="Score", value=st.session_state["P1_SCORE"])
-    PLAYER2_SCORE_COUNT.metric(label="Score", value=st.session_state["P2_SCORE"])
+        # CREATE CELEBRATORY BALLOONS ON CROSSING 100 POINTS
+        if st.session_state["P1_SCORE"] >= 100:
+            SCORE1.value = st.session_state["P1_SCORE"]
+            st.title(f"CONGRATULATIONS {st.session_state['P1_NAME']}")
+            st.snow()
+        if st.session_state["P2_SCORE"] >= 100:
+            SCORE2.value = st.session_state["P2_SCORE"]
+            st.title(f"CONGRATULATIONS {st.session_state['P2_NAME']}")
+            st.snow()
 
     hide_watermark()
