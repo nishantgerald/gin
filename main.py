@@ -19,7 +19,6 @@ def get_player_names():
 
         if P1_NAME and P2_NAME:
             st.success(f"Welcome {P1_NAME} and {P2_NAME}!")
-            st.snow()
 
     return P1_NAME, P2_NAME
 
